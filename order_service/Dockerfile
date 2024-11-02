@@ -17,5 +17,5 @@ COPY . .
 ENV PYTHONPATH=/app
 
 # Comando para iniciar a aplicação
-CMD ["uvicorn", "app.main:app", "--reload", "--host=0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--reload", "--host=0.0.0.0", "--port", "8001"]
 

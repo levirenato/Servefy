@@ -1,17 +1,17 @@
 from contextlib import asynccontextmanager
+
+from app.database import init_db
+from app.router import order_router
 from fastapi import FastAPI
-from .router import router
-from .database import engine, Base
 from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI(title="Order Service")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Código de inicialização
-    Base.metadata.create_all(bind=engine)
+    await init_db()
     yield
-    # Código de finalização
-    engine.dispose()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -27,4 +27,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router, prefix="/auth")
+# Inclui as rotas
+app.include_router(order_router, prefix="/orders")

@@ -1,0 +1,52 @@
+services:
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: "rabbitmq"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    deploy:
+      resources:
+        limits:
+          memory: 256M  
+          cpus: "0.5"
+  db:
+    image: postgres:latest
+    container_name: "db"
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "service_db"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+
+  # auth service
+  auth_service:
+    build: ./auth_service
+    container_name: "auth_service"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      DATABASE_URL: "postgresql://user:password@db:5432/service_db"
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
+    volumes:
+      - ./auth_service:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+    
+
